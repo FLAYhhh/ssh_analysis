@@ -1,9 +1,8 @@
 /***************************
- * file: pcap_main.c
+ * file: main.c
  *
  * Description:
- * main program to test different callback functions 
- * to pcap_loop();
+ * print some information in a ssh connection
  *
  * Compile with:
  * gcc -Wall -pedantic pcap_main.c -lpcap (-o foo_err_something)
@@ -27,6 +26,8 @@
  * workhorse function, we will be modifying this funciton
  * 
  */
+void *handle = NULL;
+
 u_int16_t handle_ethernet(u_char *args, const struct pcap_pkthdr *pkthdr, const u_char *packet)
 {
     struct ether_header *eptr;
@@ -164,19 +165,18 @@ void handle_TCP(u_char *args, const struct pcap_pkthdr *pkthdr, const u_char *pa
         if(src_port == 22) direction = 1;  // s -> c
         if(dst_port == 22) direction = 0;  // c -> s
         puts("handle ssh");
-        static void *handle = NULL;
-        printf("handle addr(before init):%x\n", handle);
-        static cnt = 0;
-        cnt ++;
-        if(cnt == 1){
-            printf("init\n");
-            proto_ssh_init(&handle, NULL);
-            printf("handle addr(after init):%x\n", handle);
-        }
+        //static void *handle = NULL;
+        //printf("handle addr(before init):%x\n", handle);
+        //static ssh_cnt = 0;
+        //ssh_cnt ++;
+        //if(ssh_cnt == 1){
+        //    printf("init\n");
+        //    proto_ssh_init(&handle, NULL);
+        //    printf("handle addr(after init):%x\n", handle);
+        //}
         printf("TCP len: %d\n", tcp_len);
         printf("handle addr(when passed in):%x\n", handle);
         process_ssh_stream(handle, ((char*)tcp)+ data_offset, tcp_len, direction);
-        proto_ssh_release(&handle);
     }
 }
 
@@ -238,9 +238,10 @@ int main(int argc, char **argv)
         { fprintf(stderr, "Error setting filter\n"); exit(1);}
 
     }
-
+    proto_ssh_init(&handle, NULL);
     pcap_loop(descr, atoi(argv[1]), my_callback, args);
 
+    proto_ssh_release(&handle);
     fprintf(stdout, "\nfinished\n");
     return 0;
 }

@@ -215,7 +215,7 @@ int process_kex_init(void *handle, const char *protodata, int32_t direction){
         (s_info->client_algorithms).comp_algorithms_stoc_len = comp_algorithms_stoc_len;
         (s_info->client_algorithms).comp_algorithms_stoc = (char *)malloc(comp_algorithms_stoc_len+1);
         memcpy( (s_info->client_algorithms).comp_algorithms_stoc, ptr_data+4, comp_algorithms_stoc_len);
-        (s_info->client_algorithms).comp_algorithms_ctos[comp_algorithms_ctos_len] = 0;
+        (s_info->client_algorithms).comp_algorithms_stoc[comp_algorithms_stoc_len] = 0;
 
     }
     if(direction == 1 ) {   // c -> s
