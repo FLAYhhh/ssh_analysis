@@ -5,10 +5,10 @@
  * print some information in a ssh connection
  *
  * Compile with:
- * gcc -Wall -pedantic pcap_main.c -lpcap (-o foo_err_something)
+ * gcc -Wall -pedantic main.c ssh_analysis.c -lpcap 
  *
  * Usage:
- * a.out (# of packets) "filter string"
+ * a.out (# of packets)  filepath
  * ***********************/
 
 #include <pcap.h>
@@ -175,7 +175,7 @@ void handle_TCP(u_char *args, const struct pcap_pkthdr *pkthdr, const u_char *pa
         //    printf("handle addr(after init):%x\n", handle);
         //}
         printf("TCP len: %d\n", tcp_len);
-        printf("handle addr(when passed in):%x\n", handle);
+        //printf("handle addr(when passed in):%x\n", handle);
         process_ssh_stream(handle, ((char*)tcp)+ data_offset, tcp_len, direction);
     }
 }
@@ -213,34 +213,38 @@ int main(int argc, char **argv)
     u_char *args = NULL;
 
     /* Options must b passed in as a string */
-    if(argc < 2 ){
-        fprintf(stdout, "Usage: %s numpackets \"options\"\n", argv[0]);
+    if(argc < 3 ){
+        fprintf(stdout, "Usage: %s numpackets filepath \"options\"\n", argv[0]);
         return 0;
     }
+    
+
 
     /* grab a device to peak into... */
-    dev = pcap_lookupdev(errbuf);
-    if(dev == NULL)
-    { printf("%s\n", errbuf); exit(1);}
+    //dev = pcap_lookupdev(errbuf);
+    //if(dev == NULL)
+    //{ printf("%s\n", errbuf); exit(1);}
 
-    pcap_lookupnet(dev, &netp, &maskp, errbuf);
+    //pcap_lookupnet(dev, &netp, &maskp, errbuf);
+    //descr = pcap_open_live(dev, BUFSIZ, 1, -1, errbuf);
+    //if(descr == NULL)
+    //{ printf("pcap_open_live(): %s\n", errbuf); exit(1);}
 
-    descr = pcap_open_live(dev, BUFSIZ, 1, -1, errbuf);
+    descr = pcap_open_offline(argv[2], errbuf);
     if(descr == NULL)
-    { printf("pcap_open_live(): %s\n", errbuf); exit(1);}
+    { printf("pcap_open_offline(): %s\n", errbuf); exit(1);}
 
-    if(argc >3)
+    /* if(argc >3)
     {
-        /* Lets try and compile the programe.. non-optimized */
-        if(pcap_compile(descr, &fp, argv[2], 0, netp) == -1)
+        if(pcap_compile(descr, &fp, argv[3], 0, netp) == -1)
         { fprintf(stderr, "Error calling pcap_compile\n"); exit(1);}
         if(pcap_setfilter(descr, &fp) == -1)
         { fprintf(stderr, "Error setting filter\n"); exit(1);}
 
-    }
+    }*/
     proto_ssh_init(&handle, NULL);
     pcap_loop(descr, atoi(argv[1]), my_callback, args);
-
+    pcap_close(descr);
     proto_ssh_release(&handle);
     fprintf(stdout, "\nfinished\n");
     return 0;

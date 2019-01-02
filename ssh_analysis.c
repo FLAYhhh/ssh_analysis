@@ -64,6 +64,8 @@ int proto_ssh_init(void **handle, void *userdata){
     struct SSH_info *ssh_info = (struct SSH_info*)(*handle);
     memset(ssh_info->c_id_string, 0, 255);
     memset(ssh_info->s_id_string, 0, 255);
+    memset(&(ssh_info->client_algorithms), 0, sizeof(struct Algorithms));
+    memset(&(ssh_info->client_algorithms), 0, sizeof(struct Algorithms));
     return 0;
 }
 
@@ -76,10 +78,10 @@ int proto_ssh_init(void **handle, void *userdata){
  */
 
 int process_ssh_stream(void *handle, const char *protodata, int32_t len, int32_t direction){
-    puts("In func process_ssh_stream"); 
-    print_hex(protodata, 50);
+    //puts("In func process_ssh_stream"); 
+    //print_hex(protodata, 50);
     char ssh_str[] = "SSH";
-    printf("first byte: %02x, ssh_str: %02x\n", protodata[0], ssh_str[0]);
+    //printf("first byte: %02x, ssh_str: %02x\n", protodata[0], ssh_str[0]);
     if(memcmp(protodata, ssh_str, 3)==0){
         puts("process id string");
         process_id_string(handle, protodata, len, direction);
@@ -87,6 +89,7 @@ int process_ssh_stream(void *handle, const char *protodata, int32_t len, int32_t
         puts("process kex");
         uint8_t msg_code = protodata[5];
         //ssh_callback(msg_code,NULL,NULL);
+        printf("message code : %02x\n", msg_code);
         if(msg_code == KEX_INIT){
             static int cnt = 0;
             cnt ++;
@@ -146,7 +149,7 @@ int process_id_string(void *handle, const char *protodata, int32_t len, int32_t 
 }
 
 int process_kex_init(void *handle, const char *protodata, int32_t direction){
-    puts("In func process_kex_init");
+    //puts("In func process_kex_init");
     struct SSH_info *s_info = (struct SSH_info*)handle;
     const char *ptr_data = protodata;
     if(direction == 0 ) {   // c -> s
@@ -157,7 +160,7 @@ int process_kex_init(void *handle, const char *protodata, int32_t direction){
         //namelist format is specified in RFC 4251
         ptr_data += 17;
         uint32_t kex_algorithms_len = ntohl(*(uint32_t*)ptr_data);
-        printf("kex_algorithms_len:%u/n", kex_algorithms_len);
+        //printf("kex_algorithms_len:%u\n", kex_algorithms_len);
         (s_info->client_algorithms).kex_algorithms_len = kex_algorithms_len;
         (s_info->client_algorithms).kex_algorithms = (char *)malloc(kex_algorithms_len+1);
         memcpy( (s_info->client_algorithms).kex_algorithms, ptr_data+4, kex_algorithms_len);
@@ -312,7 +315,7 @@ int process_new_keys(void *handle, const char *protodata, int32_t len, int32_t d
 
 
 int ssh_callback(int type, void *content, void *userdata){
-    printf("message code : %x\n", type);
+    //printf("message code : %x\n", type);
     struct SSH_info *s_info = (struct SSH_info *)content;
     if(type == KEX_INIT){
         struct Algorithms alg = s_info->client_algorithms;
@@ -346,27 +349,30 @@ int ssh_callback(int type, void *content, void *userdata){
 
 int proto_ssh_release(void **handle){
     struct SSH_info *s_info = (struct SSH_info*)(*handle);
-    free((s_info->client_algorithms).kex_algorithms);
-    free((s_info->client_algorithms).s_hkey_algorithms);
-    free((s_info->client_algorithms).enc_algorithms_ctos);
-    free((s_info->client_algorithms).enc_algorithms_stoc);
-    free((s_info->client_algorithms).mac_algorithms_ctos);
-    free((s_info->client_algorithms).mac_algorithms_stoc);
-    free((s_info->client_algorithms).comp_algorithms_ctos);
-    free((s_info->client_algorithms).comp_algorithms_stoc);
-
-    free((s_info->server_algorithms).kex_algorithms);
-    free((s_info->server_algorithms).s_hkey_algorithms);
-    free((s_info->server_algorithms).enc_algorithms_ctos);
-    free((s_info->server_algorithms).enc_algorithms_stoc);
-    free((s_info->server_algorithms).mac_algorithms_ctos);
-    free((s_info->server_algorithms).mac_algorithms_stoc);
-    free((s_info->server_algorithms).comp_algorithms_ctos);
-    free((s_info->server_algorithms).comp_algorithms_stoc);
     
+    if( (s_info->client_algorithms).kex_algorithms_len != 0 ){
+        free((s_info->client_algorithms).kex_algorithms);
+        free((s_info->client_algorithms).s_hkey_algorithms);
+        free((s_info->client_algorithms).enc_algorithms_ctos);
+        free((s_info->client_algorithms).enc_algorithms_stoc);
+        free((s_info->client_algorithms).mac_algorithms_ctos);
+        free((s_info->client_algorithms).mac_algorithms_stoc);
+        free((s_info->client_algorithms).comp_algorithms_ctos);
+        free((s_info->client_algorithms).comp_algorithms_stoc);
+    }
+
+    if( (s_info->server_algorithms).kex_algorithms_len != 0){
+        free((s_info->server_algorithms).kex_algorithms);
+        free((s_info->server_algorithms).s_hkey_algorithms);
+        free((s_info->server_algorithms).enc_algorithms_ctos);
+        free((s_info->server_algorithms).enc_algorithms_stoc);
+        free((s_info->server_algorithms).mac_algorithms_ctos);
+        free((s_info->server_algorithms).mac_algorithms_stoc);
+        free((s_info->server_algorithms).comp_algorithms_ctos);
+        free((s_info->server_algorithms).comp_algorithms_stoc);
+    }
     free(s_info);
     return 0;
-
 }
 
 
