@@ -122,12 +122,12 @@ int process_ssh_stream(void *handle, const char *protodata, int32_t len, int32_t
         }
 
         // there may be multiple ssh packets in a sigle tcp payload
-        uint32_t  ssh_packet_len = ntohl(*(uint32_t*)protodata);
-        if( (ssh_packet_len + 4) < len ){
-            protodata = protodata + 4 + ssh_packet_len;
-            len = len - 4 - ssh_packet_len;
+        //uint32_t  ssh_packet_len = ntohl(*(uint32_t*)protodata);
+        //if( (ssh_packet_len + 4) < len ){
+        //    protodata = protodata + 4 + ssh_packet_len;
+        //    len = len - 4 - ssh_packet_len;
         //    process_ssh_stream(handle, protodata, len, direction);
-        }
+        //}
    }
    return 0; 
 }

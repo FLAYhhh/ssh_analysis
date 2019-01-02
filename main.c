@@ -176,7 +176,8 @@ void handle_TCP(u_char *args, const struct pcap_pkthdr *pkthdr, const u_char *pa
         //}
         printf("TCP len: %d\n", tcp_len);
         //printf("handle addr(when passed in):%x\n", handle);
-        process_ssh_stream(handle, ((char*)tcp)+ data_offset, tcp_len, direction);
+        if( tcp_len > 0)
+            process_ssh_stream(handle, ((char*)tcp)+ data_offset, tcp_len, direction);
     }
 }
 
