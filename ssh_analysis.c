@@ -228,30 +228,31 @@ int process_kex_init(void *handle, const char *protodata, int32_t direction){
         printf("kex_algorithms_len:%u\n", kex_algorithms_len);
         (s_info->server_algorithms).kex_algorithms_len = kex_algorithms_len;
         (s_info->server_algorithms).kex_algorithms = (char *)malloc(kex_algorithms_len+1);
-        memset( (s_info->server_algorithms).kex_algorithms, 0, kex_algorithms_len+1);
         memcpy( (s_info->server_algorithms).kex_algorithms, ptr_data+4, kex_algorithms_len); 
+        (s_info->server_algorithms).kex_algorithms[kex_algorithms_len] = 0;
 
         ptr_data = ptr_data + 4 + kex_algorithms_len;
         uint32_t s_hkey_algorithms_len = ntohl(*(uint32_t*)ptr_data);
         printf("s_hkey_algorithms_len:%u\n",s_hkey_algorithms_len);
         (s_info->server_algorithms).s_hkey_algorithms_len = s_hkey_algorithms_len;
         (s_info->server_algorithms).s_hkey_algorithms = (char *)malloc(s_hkey_algorithms_len+1);
-        memset( (s_info->server_algorithms).s_hkey_algorithms, 0, s_hkey_algorithms_len+1);
         memcpy( (s_info->server_algorithms).s_hkey_algorithms, ptr_data+4, s_hkey_algorithms_len);
+        (s_info->server_algorithms).s_hkey_algorithms[s_hkey_algorithms_len] = 0;
 
         ptr_data = ptr_data + 4 + s_hkey_algorithms_len;
         uint32_t enc_algorithms_ctos_len = ntohl(*(uint32_t*)ptr_data);
         (s_info->server_algorithms).enc_algorithms_ctos_len = enc_algorithms_ctos_len;
         (s_info->server_algorithms).enc_algorithms_ctos = (char *)malloc(enc_algorithms_ctos_len+1);
-        memset( (s_info->server_algorithms).enc_algorithms_ctos, 0, enc_algorithms_ctos_len+1);
         memcpy( (s_info->server_algorithms).enc_algorithms_ctos, ptr_data+4, enc_algorithms_ctos_len);
+        (s_info->server_algorithms).enc_algorithms_ctos[enc_algorithms_ctos_len] = 0;
+
 
         ptr_data = ptr_data + 4 + enc_algorithms_ctos_len;
         uint32_t enc_algorithms_stoc_len = ntohl(*(uint32_t*)ptr_data);
         (s_info->server_algorithms).enc_algorithms_stoc_len = enc_algorithms_stoc_len;
         (s_info->server_algorithms).enc_algorithms_stoc = (char *)malloc(enc_algorithms_stoc_len+1);
-        memset( (s_info->server_algorithms).enc_algorithms_stoc, 0, enc_algorithms_stoc_len+1);
         memcpy( (s_info->server_algorithms).enc_algorithms_stoc, ptr_data+4, enc_algorithms_stoc_len);
+        (s_info->server_algorithms).enc_algorithms_stoc[enc_algorithms_stoc_len] = 0;
 
 
 
@@ -259,8 +260,8 @@ int process_kex_init(void *handle, const char *protodata, int32_t direction){
         uint32_t mac_algorithms_ctos_len = ntohl(*(uint32_t*)ptr_data);
         (s_info->server_algorithms).mac_algorithms_ctos_len = mac_algorithms_ctos_len;
         (s_info->server_algorithms).mac_algorithms_ctos = (char *)malloc(mac_algorithms_ctos_len+1);
-        memset( (s_info->server_algorithms).mac_algorithms_ctos, 0, mac_algorithms_ctos_len+1);
         memcpy( (s_info->server_algorithms).mac_algorithms_ctos, ptr_data+4, mac_algorithms_ctos_len);
+        (s_info->server_algorithms).mac_algorithms_ctos[mac_algorithms_ctos_len] = 0;
 
 
 
@@ -268,16 +269,16 @@ int process_kex_init(void *handle, const char *protodata, int32_t direction){
         uint32_t mac_algorithms_stoc_len = ntohl(*(uint32_t*)ptr_data);
         (s_info->server_algorithms).mac_algorithms_stoc_len = mac_algorithms_stoc_len;
         (s_info->server_algorithms).mac_algorithms_stoc = (char *)malloc(mac_algorithms_stoc_len+1);
-        memset( (s_info->server_algorithms).mac_algorithms_stoc, 0, mac_algorithms_stoc_len+1);
         memcpy( (s_info->server_algorithms).mac_algorithms_stoc, ptr_data+4, mac_algorithms_stoc_len);
+        (s_info->server_algorithms).mac_algorithms_stoc[mac_algorithms_stoc_len] = 0;
 
 
         ptr_data = ptr_data + 4 + mac_algorithms_stoc_len;
         uint32_t comp_algorithms_ctos_len = ntohl(*(uint32_t*)ptr_data);
         (s_info->server_algorithms).comp_algorithms_ctos_len = comp_algorithms_ctos_len;
         (s_info->server_algorithms).comp_algorithms_ctos = (char *)malloc(comp_algorithms_ctos_len+1);
-        memset( (s_info->server_algorithms).comp_algorithms_ctos, 0, comp_algorithms_ctos_len+1);
         memcpy( (s_info->server_algorithms).comp_algorithms_ctos, ptr_data+4, comp_algorithms_ctos_len);
+        (s_info->server_algorithms).comp_algorithms_ctos[comp_algorithms_ctos_len] = 0;
 
 
 
@@ -285,9 +286,8 @@ int process_kex_init(void *handle, const char *protodata, int32_t direction){
         uint32_t comp_algorithms_stoc_len = ntohl(*(uint32_t*)ptr_data);
         (s_info->server_algorithms).comp_algorithms_stoc_len = comp_algorithms_stoc_len;
         (s_info->server_algorithms).comp_algorithms_stoc = (char *)malloc(comp_algorithms_stoc_len+1);
-        memset( (s_info->server_algorithms).comp_algorithms_stoc, 0, comp_algorithms_stoc_len+1);
         memcpy( (s_info->server_algorithms).comp_algorithms_stoc, ptr_data+4, comp_algorithms_stoc_len);
-
+        (s_info->server_algorithms).comp_algorithms_stoc[comp_algorithms_stoc_len] = 0;
     }
     return 0;
 }
@@ -321,27 +321,40 @@ int ssh_callback(int type, void *content, void *userdata){
         struct Algorithms alg = s_info->client_algorithms;
         printf("client:\n");
         printf("kex:%s\n",alg.kex_algorithms);
+        free((s_info->client_algorithms).kex_algorithms);
         printf("s_hkey:%s\n", alg.s_hkey_algorithms);
+        free((s_info->client_algorithms).s_hkey_algorithms);
         printf("enc_ctos:%s\n", alg.enc_algorithms_ctos);
+        free((s_info->client_algorithms).enc_algorithms_ctos);
         printf("enc_stoc:%s\n", alg.enc_algorithms_stoc);
+        free((s_info->client_algorithms).enc_algorithms_stoc);
         printf("mac_ctos:%s\n", alg.mac_algorithms_ctos);
+        free((s_info->client_algorithms).mac_algorithms_ctos);
         printf("mac_stoc:%s\n", alg.mac_algorithms_stoc);
+         free((s_info->client_algorithms).mac_algorithms_stoc);
         printf("comp_ctos:%s\n", alg.comp_algorithms_ctos);
+        free((s_info->client_algorithms).comp_algorithms_ctos);
         printf("comp_stoc:%s\n", alg.comp_algorithms_stoc);
+        free((s_info->client_algorithms).comp_algorithms_stoc);
 
         alg = s_info->server_algorithms;
         printf("server:\n");
         printf("kex:%s\n",alg.kex_algorithms);
+        free((s_info->server_algorithms).kex_algorithms);
         printf("s_hkey:%s\n", alg.s_hkey_algorithms);
+        free((s_info->server_algorithms).s_hkey_algorithms);
         printf("enc_ctos:%s\n", alg.enc_algorithms_ctos);
+        free((s_info->server_algorithms).enc_algorithms_ctos);
         printf("enc_stoc:%s\n", alg.enc_algorithms_stoc);
+        free((s_info->server_algorithms).enc_algorithms_stoc);
         printf("mac_ctos:%s\n", alg.mac_algorithms_ctos);
+        free((s_info->server_algorithms).mac_algorithms_ctos);
         printf("mac_stoc:%s\n", alg.mac_algorithms_stoc);
+        free((s_info->server_algorithms).mac_algorithms_stoc);
         printf("comp_ctos:%s\n", alg.comp_algorithms_ctos);
+        free((s_info->server_algorithms).comp_algorithms_ctos);
         printf("comp_stoc:%s\n", alg.comp_algorithms_stoc);
-
-
-
+        free((s_info->server_algorithms).comp_algorithms_stoc);
     }
     return 0;    
 }
@@ -349,28 +362,6 @@ int ssh_callback(int type, void *content, void *userdata){
 
 int proto_ssh_release(void **handle){
     struct SSH_info *s_info = (struct SSH_info*)(*handle);
-    
-    if( (s_info->client_algorithms).kex_algorithms_len != 0 ){
-        free((s_info->client_algorithms).kex_algorithms);
-        free((s_info->client_algorithms).s_hkey_algorithms);
-        free((s_info->client_algorithms).enc_algorithms_ctos);
-        free((s_info->client_algorithms).enc_algorithms_stoc);
-        free((s_info->client_algorithms).mac_algorithms_ctos);
-        free((s_info->client_algorithms).mac_algorithms_stoc);
-        free((s_info->client_algorithms).comp_algorithms_ctos);
-        free((s_info->client_algorithms).comp_algorithms_stoc);
-    }
-
-    if( (s_info->server_algorithms).kex_algorithms_len != 0){
-        free((s_info->server_algorithms).kex_algorithms);
-        free((s_info->server_algorithms).s_hkey_algorithms);
-        free((s_info->server_algorithms).enc_algorithms_ctos);
-        free((s_info->server_algorithms).enc_algorithms_stoc);
-        free((s_info->server_algorithms).mac_algorithms_ctos);
-        free((s_info->server_algorithms).mac_algorithms_stoc);
-        free((s_info->server_algorithms).comp_algorithms_ctos);
-        free((s_info->server_algorithms).comp_algorithms_stoc);
-    }
     free(s_info);
     return 0;
 }
